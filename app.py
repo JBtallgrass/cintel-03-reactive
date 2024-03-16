@@ -1,4 +1,3 @@
-
 import plotly.express as px
 from shiny.express import input, ui
 from shiny import render
@@ -6,6 +5,7 @@ from shinywidgets import render_plotly
 import pandas as pd
 import seaborn as sns
 import palmerpenguins  # This package provides the Palmer Penguins dataset
+from shiny import reactive  
 
 # built-in function to load the Palmer Penguins dataset
 penguins_df = palmerpenguins.load_penguins()
@@ -95,3 +95,15 @@ with ui.layout_columns():
             color="species",
             symbol="species",
         )
+# --------------------------------------------------------
+# Reactive calculations and effects
+# --------------------------------------------------------
+
+# Add a reactive calculation to filter the data
+# By decorating the function with @reactive, we can use the function to filter the data
+# The function will be called whenever an input functions used to generate that output changes.
+# Any output that depends on the reactive function (e.g., filtered_data()) will be updated when the data changes.
+
+@reactive.calc
+def filtered_data():
+    return penguins_df
