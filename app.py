@@ -60,14 +60,14 @@ with ui.layout_columns(col_widths=(4, 8)):
 
         @render.data_frame
         def render_penguins_table():
-            return penguins_df
+            return filtered_data()
 
     with ui.card(full_screen=True):
         ui.h3("Penguins Data Grid")
 
         @render.data_frame
         def render_penguins_grid():
-            return penguins_df
+            return filtered_data()
 
 
 # Use ui.hr() to add a horizontal rule to the sidebar
@@ -80,7 +80,7 @@ with ui.layout_columns():
 
         @render_plotly
         def plotly_histogram():
-            return px.histogram(penguins_df, x="species")
+            return px.histogram(filtered_data(), x="species")
 
     with ui.card(full_screen=True):
         ui.h3("All Species ScatterPlot-plotly")
@@ -88,7 +88,7 @@ with ui.layout_columns():
         @render_plotly
         def plotly_scatterplot():
             return px.scatter(
-            penguins_df,
+            filtered_data(),
             title="All Species ScatterPlot-plotly",
             x="body_mass_g",
             y="bill_length_mm",
