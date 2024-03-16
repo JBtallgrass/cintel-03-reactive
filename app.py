@@ -1,3 +1,4 @@
+
 import plotly.express as px
 from shiny.express import input, ui
 from shiny import render
@@ -77,19 +78,20 @@ with ui.layout_columns():
     with ui.card(full_screen=True):
         ui.h3("All Species Histogram-Plotly")
 
-    @render_plotly
-    def plotly_histogram():
-        return px.histogram(penguins_df, x="species")
+        @render_plotly
+        def plotly_histogram():
+            return px.histogram(penguins_df, x="species")
 
     with ui.card(full_screen=True):
         ui.h3("All Species ScatterPlot-plotly")
 
-    @render_plotly
-    def plotly_scatterplot():
-        return px.scatter(
+        @render_plotly
+        def plotly_scatterplot():
+            return px.scatter(
             penguins_df,
             title="All Species ScatterPlot-plotly",
             x="body_mass_g",
             y="bill_length_mm",
             color="species",
             symbol="species",
+        )
