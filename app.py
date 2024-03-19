@@ -5,13 +5,16 @@ from shinywidgets import render_plotly
 import pandas as pd
 import seaborn as sns
 import palmerpenguins  # This package provides the Palmer Penguins dataset
-from shiny import reactive  
+from shiny import reactive
 
 # built-in function to load the Palmer Penguins dataset
 penguins_df = palmerpenguins.load_penguins()
 
 # Page name
 ui.page_opts(title="JB Penguins Data", fillable=True)
+
+color_map = {"Adelie": "blue", "Gentoo": "green", "Chinstrap": "red"}
+
 
 # sidebar for user interaction
 with ui.sidebar(open="open"):
@@ -40,6 +43,15 @@ with ui.sidebar(open="open"):
         "Species in Scatterplot",
         ["Adelie", "Gentoo", "Chinstrap"],
         selected=["Adelie"],
+        inline=True,
+    )
+
+    # Use ui.input_checkbox_group() to create a checkbox group input to filter the islands
+    ui.input_checkbox_group(
+        "selected_islands",
+        "Islands in Graphs",
+        ["Torgersen", "Biscoe", "Dream"],
+        selected=["Torgersen", "Biscoe", "Dream"],
         inline=True,
     )
 
@@ -80,7 +92,12 @@ with ui.layout_columns():
 
         @render_plotly
         def plotly_histogram():
-            return px.histogram(filtered_data(), x="species")
+            return px.histogram(
+                filtered_data(),
+                x="species",
+                color="species",
+                color_discrete_map=color_map,
+            )
 
     with ui.card(full_screen=True):
         ui.h3("All Species ScatterPlot-plotly")
@@ -88,13 +105,34 @@ with ui.layout_columns():
         @render_plotly
         def plotly_scatterplot():
             return px.scatter(
-            filtered_data(),
-            title="All Species ScatterPlot-plotly",
-            x="body_mass_g",
-            y="bill_length_mm",
-            color="species",
-            symbol="species",
-        )
+                filtered_data(),
+                title="All Species ScatterPlot-plotly",
+                x="body_mass_g",
+                y="bill_length_mm",
+                color="species",
+                symbol="species",
+                color_discrete_map=color_map,
+            )
+
+    with ui.card(full_screen=True):
+        ui.h3("Penguin Population by Island")
+
+        @render_plotly()
+        def island_population_chart():
+            filtered = filtered_data()
+            island_counts = filtered["island"].value_counts().reset_index()
+            island_counts.columns = ["island", "count"]
+            return px.bar(
+                island_counts,
+                x="island",
+                y="count",
+                title="Penguin Population by Island",
+                labels={"count": "Number of Penguins"},
+                color="island",
+                color_discrete_map=color_map,
+            )
+
+
 # --------------------------------------------------------
 # Reactive calculations and effects
 # --------------------------------------------------------
@@ -104,6 +142,10 @@ with ui.layout_columns():
 # The function will be called whenever an input functions used to generate that output changes.
 # Any output that depends on the reactive function (e.g., filtered_data()) will be updated when the data changes.
 
+
 @reactive.calc
 def filtered_data():
-    return penguins_df
+    return penguins_df[
+        (penguins_df["species"].isin(input.selected_species_list()))
+        & (penguins_df["island"].isin(input.selected_islands()))
+    ]
